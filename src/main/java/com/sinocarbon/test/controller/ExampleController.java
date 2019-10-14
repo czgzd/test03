@@ -29,6 +29,7 @@ public class ExampleController {
 	///121212121我改的
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
 //	@PreAuthorize("hasRole('ROLE_ADMIN') AND hasRole('ROLE_DBA')")
+	//嗯？？？
 //	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ADDUSER','ROLE_CHECKUSER','ROLE_EXPORTUSER')")
 //	@PreAuthorize("hasAuthority('example:get/example/test') or hasRole('ROLE_SUPERADMIN')")
 	@GetMapping("/test")
