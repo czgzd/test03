@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "案例121API,真实项目中请删除")
 public class ExampleController {
 
-
+///1121212121
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
 //	@PreAuthorize("hasRole('ROLE_ADMIN') AND hasRole('ROLE_DBA')")
 //	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ADDUSER','ROLE_CHECKUSER','ROLE_EXPORTUSER')")
