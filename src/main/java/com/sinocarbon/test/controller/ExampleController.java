@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 public class ExampleController {
 
 ///1121212121
+	///121212121我改的
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
 //	@PreAuthorize("hasRole('ROLE_ADMIN') AND hasRole('ROLE_DBA')")
 //	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ADDUSER','ROLE_CHECKUSER','ROLE_EXPORTUSER')")
