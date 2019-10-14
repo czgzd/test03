@@ -37,6 +37,7 @@ public class ExampleController {
 			@ApiImplicitParam(paramType = "query", name = "username", value = "用户名", dataType = "String", required = true),
 			@ApiImplicitParam(paramType = "query", name = "tenantId", value = "租户id", dataType = "String", required = true) })
 	public String findUserInfoByUsername() {
+		//葛明明修改2
 		int a=1;  
 		return  "111";
 		//葛明明修改122
