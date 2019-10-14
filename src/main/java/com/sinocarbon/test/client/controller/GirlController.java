@@ -42,9 +42,9 @@ public class GirlController
         // return "121";
     	int result = girlService.delete(id);
 		if (result >= 1) {
-			return "bill提示删除成功";
+			return "all提示删除成功";
 		} else {
-			return "bill提示删除失败";
+			return "all提示删除失败";
 		}
 	}
 
@@ -52,9 +52,9 @@ public class GirlController
 	public String update(@Valid Girl girl) {
 		int result = girlService.updateGirl(girl);
 		if (result >= 1) {
-			return "bill会提示修改成功";
+			return "all提示修改成功";
 		} else {
-			return "bill会提示修改失败";
+			return "all提示修改失败";
 		}
  
 	}
