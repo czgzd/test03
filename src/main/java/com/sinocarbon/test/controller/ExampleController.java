@@ -32,7 +32,7 @@ public class ExampleController {
 	//嗯？？？
 //	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_ADDUSER','ROLE_CHECKUSER','ROLE_EXPORTUSER')")
 //	@PreAuthorize("hasAuthority('example:get/example/test') or hasRole('ROLE_SUPERADMIN')")
-	@GetMapping("/test")
+	@GetMapping("/111test")
 	@ApiOperation(value = "findUserInfoByUsername", notes = "查询用户")
 	@ApiImplicitParams({
 			@ApiImplicitParam(paramType = "query", name = "username", value = "用户名", dataType = "String", required = true),
