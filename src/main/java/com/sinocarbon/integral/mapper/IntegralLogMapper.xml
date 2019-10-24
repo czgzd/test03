@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sinocarbon.integral.dao.IntegralLogDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.sinocarbon.integral.pojo.IntegralLog">
+		<id column="id" property="id" />
+		<result column="user_id" property="userId" />
+		<result column="operation_type_id" property="operationTypeId" />
+		<result column="integral" property="integral" />
+		<result column="task_copy_id" property="taskCopyId" />
+		<result column="registration_code" property="registrationCode" />
+		<result column="gmt_create" property="gmtCreate" />
+		<result column="gmt_modified" property="gmtModified" />
+	</resultMap>
+
+	<select id="listIntegralLog"
+		resultType="com.sinocarbon.integral.pojo.IntegralLogAndTypeNamePOJO">
+		SELECT
+		l.integral integral,
+		l.gmt_create gmtCreate, 
+		l.operation_type_id operationTypeId,
+		g.operation_name operationName,
+		t.operation_picture_url operationPictureUrl,
+		t.operation_color  opertaionColor
+		FROM
+		integral_log l
+		LEFT JOIN
+		integral_operation_type_dictionary g ON
+		l.operation_type_id =
+		g.id
+		LEFT JOIN integral_operation_type t ON g.id = t.operation_id
+		where 1=1
+		<if test="userId!=null"> and l.user_id = #{userId}</if>
+		<if test="registrationCode!=null"> and t.registration_code = #{registrationCode} </if>
+		<if test="operationTypeId!=null"> and l.operation_type_id = #{operationTypeId}</if>
+		<if test="serchType==1"> and YEARWEEK(date_format(l.gmt_create,'%Y-%m-%d'),1) =
+			YEARWEEK(now(),1)
+		</if>
+		<if test="serchType==2"> and YEARWEEK(date_format(l.gmt_create,'%Y-%m-%d'),1) = YEARWEEK(now(),1)-1</if>
+		<if test="serchType==3"> and l.gmt_create>DATE_SUB(CURDATE(), INTERVAL 3 MONTH)</if>
+		order by
+		l.gmt_create DESC
+
+	</select>
+	<!-- 柱状图数据 -->
+	<select id="listIntegralLogGroup" resultType="com.sinocarbon.integral.pojo.IntegralLogAndTypeNamePOJO">
+	    SELECT
+		 SUM(g.integral) integral,
+		 g.operation_type_id operationTypeId,
+		 g.gmt_create gmtCreate,
+		 t.operation_color  operationColor,
+		 t.operation_picture_url operationPictureUrl
+		 
+	FROM
+		integral_log g
+		left join 
+		integral_operation_type_dictionary d
+		 on d.id = g.operation_type_id
+		left join 
+		integral_operation_type t 
+		on d.id = t.operation_id
+	WHERE
+		1 = 1 
+		AND g.user_id = #{userId}
+		<if test="registrationCode!=null"> and t.registration_code = #{registrationCode} </if>
+		<if test="serchType==1"> and YEARWEEK( date_format( g.gmt_create, '%Y-%m-%d' ),1 ) = YEARWEEK( now( ) ,1)</if>
+		<if test="serchType==2"> and YEARWEEK( date_format( g.gmt_create, '%Y-%m-%d' ),1 ) = YEARWEEK( now( ) ,1)-1</if>		
+		GROUP BY 
+		g.operation_type_id,
+		date_format( g.gmt_create, '%Y-%m-%d' )	
+	</select>
+	
+	
+	<select id="countLastWeekInfinityCard" parameterType="Integer"
+		resultType="com.sinocarbon.integral.pojo.IntegralLogAndTypeNamePOJO">
+		SELECT
+		t.operation_color operationColor,
+		SUM(i.integral) integral
+		FROM
+		integral_log i
+		LEFT JOIN
+		integral_operation_type_dictionary o on o.id = i.operation_type_id
+		LEFT JOIN
+		integral_operation_type t on t.operation_id = o.id 
+		WHERE 1=1
+		<if test="userId!=null"> and i.user_id = #{userId} </if>
+		<if test="registrationCode!=null"> and t.registration_code = #{registrationCode} </if>
+		and YEARWEEK(date_format(i.gmt_create,'%Y-%m-%d'),1) = YEARWEEK(now(),1)-1
+		group by
+		t.operation_color
+	</select>
+	
+	
+	<select id="getToadyLastIntegralLog"
+		parameterType="com.sinocarbon.integral.pojo.AppUserInfo"
+		resultMap="BaseResultMap">
+		SELECT
+		l.integral,
+		l.gmt_create,
+		l.operation_type_id type
+		FROM
+		integral_log l
+		WHERE
+		l.user_id = #{userId}
+		<if test="operationTypeId!=null"> AND l.operation_type_id=#{operationTypeId}</if>
+		AND to_days(gmt_create) = to_days(now())
+		ORDER BY
+		gmt_create DESC
+		LIMIT 1
+	</select>
+	
+	
+</mapper>

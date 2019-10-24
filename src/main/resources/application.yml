@@ -1,8 +1,8 @@
 spring:
   profiles:
-    active: dev
+    active: prd
   application:
-    name: example
+    name: integral-service
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8

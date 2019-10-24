@@ -39,4 +39,6 @@ aliyun:
 
 - 执行如下命令安装服务
 
-`kubectl apply -f app.yaml`
+（1）`kubectl apply -f xxxx-pvc.yaml`
+
+（2）`kubectl apply -f app.yaml`

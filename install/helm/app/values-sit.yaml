@@ -1,0 +1,23 @@
+#命名空间
+namespace:
+  infinity-sit
+#服务应用名称
+appname:
+  integral-service
+imagename:
+  integralcenter-srv:{{imageversion}}
+#启动副本数，dev：1；sit：1；prd：2
+replicas:
+  1
+nodeselector:
+  node-3
+#阿里云相关配置
+#	imagePullSecrets   用于拉取阿里云镜像口令
+aliyun:
+  containerSrv:
+    region:
+      registry.cn-qingdao.aliyuncs.com
+    namespace:
+      sinocarbon
+    imagePullSecrets:
+      tiger

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8083
   connectionTimeout: 5000
   tomcat:
     max-http-post-size: 0
@@ -8,7 +8,7 @@ server:
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://47.105.114.98:3306/test?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true
+    url: jdbc:mysql://192.168.0.109:30870/horus_dev2?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&serverTimezone=GMT%2B8
     username: root
     password: SCIIscii123
     driver-class-name: com.mysql.jdbc.Driver
@@ -28,9 +28,9 @@ spring:
     add-mappings: false
   redis:
     database: 0
-    cache-database: 2  #配置自己的redis库，database不要使用0
-    port: 6379
-    host: 192.168.0.234
+    cache-database: 15  #配置自己的redis库，database不要使用0
+    port: 30862
+    host: 192.168.0.109
     timeout: 30000
     jedis:
       pool:
@@ -40,11 +40,13 @@ spring:
         min-idle: 8   # 连接池中的最小空闲连接
           
 mybatis-plus:
-  mapper-locations: classpath:/com/sinocarbon/test/mapper/*Mapper.xml
-  type-aliases-package: com.sinocarbon.test.client.pojo
+  mapper-locations: classpath:/com/sinocarbon/integral/mapper/*Mapper.xml
+  type-aliases-package: com.sinocarbon.integral.pojo
   global-config.logic-delete-value: 0
   global-config.logic-not-delete-value: 1
   global-config.sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
   
 logging:
   config: classpath:logback-boot.xml
+configService:
+  uri: http://localhost:8087  

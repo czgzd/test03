@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sinocarbon.integral.dao.IntegralDaySummaryDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.sinocarbon.integral.pojo.IntegralDaySummary">
+		<id column="id" property="id" />
+		<result column="user_id" property="userId" />
+		<result column="emission_reduction"
+			property="emissionReduction" />
+		<result column="walk_emission_reduction"
+			property="walkEmissionReduction" />
+
+		<result column="walk_step" property="walkStep" />
+		<result column="bike_kilometre" property="bikeKilometre" />
+		<result column="bike_emission_reduction"
+			property="bikeEmissionReduction" />
+		<result column="integral" property="integral" />
+		<result column="sign_integral" property="signIntegral" />
+		<result column="login_integral" property="loginIntegral" />
+		<result column="walk_integral" property="walkIntegral" />
+		<result column="bike_integral" property="bikeIntegral" />
+		<result column="challenge_integral"
+			property="challengeIntegral" />
+		<result column="bean" property="bean" />
+		<result column="registration_code" property="registrationCode" />
+		<result column="gmt_create" property="gmtCreate" />
+		<result column="gmt_modified" property="gmtModified" />
+		<result column="exchanges_number" property="exchangesNumber" />
+	</resultMap>
+
+	<select id="getTodayIntegralDaySummary" parameterType="Integer"
+		resultType="com.sinocarbon.integral.pojo.UserIntegralDaySummaryPOJO">
+		SELECT
+		g.id,
+		a.user_img headImg,
+		a.user_gender userGender,
+		a.user_nickname userNickName,
+		a.user_signature userSignature,
+		g.user_id userId,
+		g.integral integral,
+		g.emission_reduction emissionReduction,
+		g.walk_emission_reduction
+		walkEmissionReduction,
+		g.walk_step walkStep,
+		g.bike_emission_reduction
+		bikeEmissionReduction,
+		g.bike_kilometre
+		bikeKilometre,
+		g.sign_integral
+		signIntegral,
+		g.login_integral
+		loginIntegral,
+		g.walk_integral
+		walkIntegral,
+		g.bike_integral
+		bikeIntegral,
+		g.challenge_integral
+		challengeIntegral,
+		g.bean bean
+		FROM
+		integral_day_summary g
+		LEFT JOIN
+		app_user_info a
+		ON
+		g.user_id =a.id
+		where
+		g.user_id = #{userId}
+		and
+		to_days(g.gmt_create) = to_days(now())
+	</select>
+	
+	
+	<select id="listIntegralDaySummary" parameterType="Integer"
+		resultType="com.sinocarbon.integral.pojo.UserIntegralDaySummaryPOJO">
+		SELECT
+		g.id id,
+		a.user_img headImg,
+		a.user_gender userGender,
+		a.user_nickname userNickName,
+		a.user_signature userSignature,
+		g.user_id userId,
+		g.integral integral,
+		g.emission_reduction emissionReduction,
+		g.walk_emission_reduction
+		walkEmissionReduction,
+		g.walk_step walkStep,
+		g.bike_emission_reduction
+		bikeEmissionReduction,
+		g.bike_kilometre
+		bikeKilometre,
+		g.sign_integral
+		signIntegral,
+		g.login_integral
+		loginIntegral,
+		g.walk_integral
+		walkIntegral,
+		g.bike_integral
+		bikeIntegral,
+		g.challenge_integral
+		challengeIntegral,
+		g.bean bean,
+		g.consumption_bean consumptionBean,
+		g.exchanges_number exchangesNumber
+		FROM
+		integral_day_summary g
+		LEFT JOIN
+		app_user_info a
+		ON
+		g.user_id =a.id
+		where
+		g.user_id = #{userId}
+		order by g.id DESC
+	</select>
+
+
+	<!-- 根据page查询并排序用户积分 -->
+	<select id="listTodayUserIntegralDaySummaryPOJO"
+		parameterType="String"
+		resultType="com.sinocarbon.integral.pojo.UserIntegralDaySummaryPOJO">
+		SELECT
+		a.user_img headImg,
+		a.user_gender userGender,
+		a.user_nickname userNickName,
+		a.user_signature userSignature,
+		g.user_id	userId,
+		g.integral integral,
+		g.emission_reduction emissionReduction,
+		g.walk_emission_reduction
+		walkEmissionReduction,
+		g.bike_emission_reduction bikeEmissionReduction,
+		g.sign_integral
+		signIntegral,
+		g.login_integral loginIntegral,
+		g.walk_integral
+		walkIntegral,
+		g.bike_integral bikeIntegral,
+		g.challenge_integral
+		challengeIntegral,
+		g.bean bean
+		FROM
+		integral_day_summary g
+		JOIN
+		app_user_info a
+		ON
+		g.user_id =a.id
+		join
+		user_info u
+		on
+		a.main_id=u.account_id
+		WHERE
+		u.status = 1 and
+		to_days(g.gmt_create)=to_days(now())
+		and
+		g.registration_code =
+		#{registrationCode}
+		ORDER BY
+		g.integral DESC,
+		a.main_id DESC
+	</select>
+
+
+	<select id="countIntegralDaySummary" parameterType="Integer"
+		resultMap="BaseResultMap">
+		SELECT
+		sum(emission_reduction) emission_reduction,
+		sum(walk_emission_reduction) walk_emission_reduction,
+		sum(bike_emission_reduction) bike_emission_reduction,
+		sum(sign_integral) sign_integral,
+		sum(login_integral) login_integral,
+		sum(walk_integral) walk_integral,
+		sum(bike_integral) bike_integral,
+		sum(challenge_integral) challenge_integral,
+		sum(bike_kilometre)
+		bike_kilometre,
+		sum(walk_step) walk_step,
+		sum(bean) bean
+		FROM
+		integral_day_summary
+		WHERE
+		user_id = #{userId}
+		<if test="searchType==1">AND YEARWEEK( date_format(gmt_create, '%Y-%m-%d' ),1 ) =
+			YEARWEEK( now( ) ,1)
+		</if>
+		<if test="searchType==2">AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= gmt_create
+		</if>
+	</select>
+	
+	
+	
+
+	<!-- 查询某一天的各个租户下总积分 -->
+	<select id="countSomedayUserIntegral" parameterType="String"
+		resultType="java.util.Map">
+		select
+		b.registration_code,
+		sum(b.integral) integralSum
+		from
+		integral_day_summary b
+		join
+		app_user_info a
+		on b.user_id = a.id
+		join
+		user_info u
+		on a.main_id=u.account_id
+
+		where
+		DATE_FORMAT(b.gmt_create,'%Y-%m-%d')=#{dateStr}
+		and
+		u.status=1
+		GROUP
+		BY
+		b.registration_code
+
+
+	</select>
+
+	<!-- 根据日期 查询所有用户信息 -->
+	<select id="listAllRecordByDateStr" parameterType="String"
+		resultMap="BaseResultMap">
+
+		select
+		b.id,
+		b.user_id,
+		b.emission_reduction,
+		b.walk_emission_reduction,
+		b.bike_emission_reduction,
+		b.integral,
+		b.bean,
+		b.gmt_create,
+		b.registration_code,
+		
+		b.walk_step,
+		b.walk_integral ,
+		b.bike_kilometre ,
+		b.bike_integral ,
+		b.sign_integral ,
+		b.login_integral ,
+		b.exchanges_number
+		
+		from
+		integral_day_summary b
+		JOIN
+		app_user_info app
+		on b.user_id = app.id
+		join
+		user_info u
+		on app.main_id=u.account_id
+		where
+		DATE_FORMAT(b.gmt_create,'%Y-%m-%d')=#{dateStr}
+		and u.status=1
+
+	</select>
+
+
+	<select id="listBeanData" resultType="com.sinocarbon.integral.pojo.UserSurplusBeanPOJO">
+	   select 
+		sumDay.user_id  userId ,
+		sumDay.registration_code registrationCode ,
+		userInfo.bean surplusBean,
+		sum(ord.pay_bean) payBean
+		from  integral_day_summary sumDay
+		left join order_info ord on ord.user_id = sumDay.user_id 
+		left join user_account_info userInfo on userInfo.user_id = sumDay.user_id
+		
+		where 
+		ord.order_state in (3,4,5) 
+		and date_sub(CURDATE(),interval 1 day) = DATE_FORMAT(ord.gmt_modified,"%y-%m-%d")
+		and date_sub(CURDATE(),interval 1 day) = DATE_FORMAT(sumDay.gmt_create,"%y-%m-%d")
+		GROUP BY sumDay.user_id
+	
+	
+	</select>
+ 
+
+
+</mapper>

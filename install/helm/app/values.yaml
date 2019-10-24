@@ -1,11 +1,11 @@
 #命名空间
 namespace:
-  ${namespace}
+  infinity-dev
 #服务应用名称
 appname:
-  ${appname}
+  integral-service
 imagename:
-  ${jarname}:dev.1.0.0.snapshot
+  integralcenter-srv:dev.1.0.0.snapshot
 #启动副本数，dev：1；sit：1；prd：2
 replicas:
   1
@@ -18,4 +18,4 @@ aliyun:
     namespace:
       sinocarbon
     imagePullSecrets:
-      ${namespace}
+      infinity-dev

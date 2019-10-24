@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sinocarbon.integral.dao.UserAccountInfoDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.sinocarbon.integral.pojo.UserAccountInfo">
+		<id column="id" property="id" />
+		<result column="user_id" property="userId" />
+		<result column="integral" property="integral" />
+		<result column="bean" property="bean" />
+		<result column="total_bean" property="totalBean" />
+		<result column="emission_reduction"
+			property="emissionReduction" />
+		<result column="gmt_create" property="gmtCreate" />
+		<result column="gmt_modified" property="gmtModified" />
+		<result column="registration_code" property="registrationCode" />
+	</resultMap>
+
+	<select id="getUserAccountInfo"
+		parameterType="com.sinocarbon.integral.pojo.UserAccountInfo"
+		resultMap="BaseResultMap">
+		select
+		id,
+		user_id,
+		integral,
+		bean,
+		total_bean,
+		emission_reduction,
+		gmt_create,
+		gmt_modified
+		from
+		user_account_info
+		where
+		user_id=#{userId}
+	</select>
+	<select id="listUserAccountPOJO"
+		parameterType="com.sinocarbon.integral.pojo.AppUserInfo"
+		resultType="com.sinocarbon.integral.pojo.UserAccountPOJO">
+		SELECT
+		a.id userId,
+		a.user_img headImg,
+		a.user_gender userGender,
+		a.user_nickname userNickName,
+		a.user_signature userSignature,
+		i.integral integral,
+		i.bean
+		FROM
+		 user_account_info i
+		JOIN
+		app_user_info a
+		on
+		i.user_id =a.id
+		join
+		user_info u
+		on u.account_id=a.main_id
+		WHERE
+		u.status =1
+		<if test="registrationCode!=null"> and i.registration_code = #{registrationCode}</if>
+
+		ORDER BY
+		i.integral DESC,
+		a.main_id DESC
+	</select>
+</mapper>

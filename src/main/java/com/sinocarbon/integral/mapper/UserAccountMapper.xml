@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sinocarbon.integral.dao.UserAccountDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.sinocarbon.integral.pojo.UserAccountInfoPOJO">
+		<id column="id" property="id" />
+		<result column="user_nickname" property="userNickName" />
+		<result column="user_name" property="userName" />
+		<result column="user_signature" property="userSignature" />
+		<result column="department_name" property="departmentName" />
+		<result column="job_name" property="jobName" />
+		<result column="user_img" property="userImg" />
+		<result column="organization_name" property="organizationName" />
+		<result column="on_line_days" property="onLineDays" />
+		<result column="walk_step" property="walkStep" />
+		<result column="bike_kilometre" property="bikeKilometre" />
+		<result column="emission_reduction"
+			property="emissionReduction" />
+		<result column="integral" property="integral" />
+		<result column="total_bean" property="totalBean" />
+		<result column="exchanges_number" property="exchangesNumber" />
+		<result column="bean" property="bean" />
+		<result column="consumption_integral"
+			property="consumptionIntegral" />
+	</resultMap>
+
+	<select id="listUserAccountInfo"
+		parameterType="com.sinocarbon.integral.pojo.UserAccountInputPOJO"
+		resultMap="BaseResultMap">
+		SELECT
+		a.id,a.on_line_days,a.walk_step,a.bike_kilometre,a.emission_reduction,a.integral,a.exchanges_number,a.total_bean,a.bean,
+		b.user_name,c.user_nickname,(a.total_bean-a.bean) consumption_integral
+		FROM
+		user_account_info a
+		left join app_user_info c on a.user_id=c.id
+		left join user_info b on c.main_id=b.account_id
+		
+		where 1=1
+		<if test="userName!=null"> and b.user_name = #{userName}</if>
+		<if test="userNickName!=null"> and c.user_nickname = #{userNickName}</if>
+		<if test="minIntegral!=null"> and a.integral &gt;= #{minIntegral}</if>
+		<if test="maxIntegral!=null"> and a.integral &lt;= #{maxIntegral}</if>
+		<if test="minExchangeIntegral!=null"> and a.total_bean &gt;= #{minExchangeIntegral}</if>
+		<if test="maxExchangeIntegral!=null"> and a.total_bean &lt;= #{maxExchangeIntegral}</if>
+		<if test="minCarbonSave!=null"> and a.emission_reduction &gt;= #{minCarbonSave}</if>
+		<if test="maxCarbonSave!=null"> and a.emission_reduction &lt;= #{maxCarbonSave}</if>
+		<if test="registrationCode!=null"> and a.registration_code = #{registrationCode}</if>
+		order by a.id DESC
+	</select>
+
+<select id="getUserAccountInfoById" parameterType="com.sinocarbon.integral.pojo.UserAccountInputPOJO"
+		resultMap="BaseResultMap">
+		SELECT
+		b.integral,f.department_name,g.job_name,
+		c.user_name,a.user_nickname,a.user_signature,a.user_img,d.organization_name
+		FROM
+		app_user_info a
+		left join user_account_info b on a.id=b.user_id
+		left join user_info c on a.main_id=c.account_id
+		left join organization_info d on a.registration_code=d.tenant_id
+		left join app_department_info f on a.department_id=f.id
+		left join app_user_job g on a.job_id=g.id
+		where 1=1
+		<if test="id!=null"> and a.id = #{id}</if>
+		<if test="registrationCode!=null"> and a.registration_code = #{registrationCode}</if>
+	</select>
+
+
+
+
+</mapper>

@@ -1,0 +1,194 @@
+pipeline {
+
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '9', artifactNumToKeepStr: '9'))
+    }
+	tools {
+	    maven 'Maven 3.6'
+		jdk 'JDK 8'
+	}
+    environment {
+        registry = 'registry-vpc.cn-qingdao.aliyuncs.com'
+        registry_credential = 'aliyun-docker-registry'
+        // 镜像名称
+        image_name = 'sinocarbon/integralcenter-srv'
+        // 镜像参数
+        jarname = 'integral-service-0.0.1-SNAPSHOT.jar' // war包名称
+        SONAR_HOME = "${tool 'sonarscanner'}"
+        PATH="${env.SONAR_HOME}/bin:${env.PATH}"
+        sonar_pro_name="integral-center"
+    }
+
+    stages {		   
+	    stage('检测当前jdk以及maven版本'){
+	        steps {
+		        sh 'mvn --version'
+		        sh 'java -version'
+		    }
+	    }
+		
+        stage('构建准备') {
+            steps {
+                script {
+                    // 产品版本
+                    ver = readFile('Jenkins/VERSION')
+					// 标签 
+                    tag = [
+                           'dev': "${ver}.snapshot",
+                           'sit': "${ver}.alpha",
+                           'uat': "${ver}.beta",
+                           'prd': "${ver}.release",
+                    ][BRANCH_NAME]
+                           // 存放k8s的yml文件远程主机id 
+                    deploy_host_crdid = [
+                           'dev': "",
+                           'sit': "devopsOther",
+                           'uat': "",
+                           'prd': "devopsPrd",
+                    ][BRANCH_NAME]
+                    // 存放k8s的yml文件远程主机地址 
+                    deploy_host = [
+                           'dev': "",
+                           'sit': "39.98.223.195",
+                           'uat': "",
+                           'prd': "39.98.73.128",
+                           ][BRANCH_NAME]
+                    //  k8s yaml 文件名称
+				    k8s_yaml_name = "integral_service"
+                    helm_values_name=[
+                           'dev': "values",
+                           'sit': "values-sit",
+                           'uat': "values-uat",
+                           'prd': "values-prd",
+                    ][BRANCH_NAME]
+				   //  远程主机存放k8s yaml 文件路径
+                    k8s_yaml_deploy_path = [
+                           'dev': "/opt/infinity-dev/integral_service",
+                           'sit': "/opt/infinity-sit/integral_service",
+                           'uat': "/opt/infinity-uat/integral_service",
+                           'prd': "/opt/infinity-prd/integral_service",
+                    ][BRANCH_NAME]
+                    // 修订版本
+                    rev =  [
+                        'dev': "dev",
+                           'sit': "${GIT_COMMIT}"[0..4],
+                           'uat': "${GIT_COMMIT}"[0..4],
+                          'prd': "${GIT_COMMIT}"[0..4],
+                    ][BRANCH_NAME]
+                    // 构建时间
+                    build_ts = new Date().format("yyyy-MM-dd_HH:mm:ss")
+                    build_id = "#${BUILD_ID}"
+                }
+            }
+        }
+		stage('修改配置文件'){
+             when {
+                expression { BRANCH_NAME ==~ /(sit|prd)/ }
+                
+            }
+		    steps{
+                //修改配置文件
+                sh "sed -i 's/active.*/active: ${BRANCH_NAME}/g' `grep 'active.*'  -rl src/main/resources/application.yml` "
+		    }
+        }
+		
+		stage('Maven 构建'){
+		    steps{
+                sh "mvn clean install -Dmaven.test.skip=true"
+		    }
+        }
+        stage('sonarqube代码检查') {
+		    steps{
+               withSonarQubeEnv('sonar') {
+            sh """
+            sonar-scanner -X -Dsonar.language=java \
+            -Dsonar.projectKey=${sonar_pro_name} \
+            -Dsonar.projectName=${sonar_pro_name} \
+            -Dsonar.projectVersion=${BUILD_ID} \
+            -Dsonar.sources=src/ \
+            -Dsonar.sourceEncoding=UTF-8 \
+            -Dsonar.java.binaries=target/ \
+            -Dsonar.exclusions=src/test/**
+            """
+               }
+		    }
+        }
+
+        stage('上传镜像') {          
+            steps {
+                sh "cp  ${env.WORKSPACE}/install/Dockerfile ${env.WORKSPACE}/Jenkins/"
+				sh "cp  ${env.WORKSPACE}/target/${jarname} ${env.WORKSPACE}/Jenkins/"
+                script {
+                    // docker build
+                    def image = docker.build("${image_name}:${tag}", " --build-arg jarname=${jarname}"                                                                           + " Jenkins/")
+                    // docker push
+                    docker.withRegistry("https://${registry}", registry_credential) {
+                        image.push("${rev}.${tag}")
+                    }
+                }
+                    // delete local image
+                script {
+		            sh "docker rmi -f  ${image_name}:${tag} && docker rmi -f  ${registry}/${image_name}:${rev}.${tag}"
+                }
+            }
+        }
+      stage('部署dev应用') {
+            when {
+                expression { BRANCH_NAME ==~ /(dev)/ }
+                
+            }
+
+            steps {
+                script {
+                  sh "scp  -P  3906  -r install/ root@221.226.116.222:${k8s_yaml_deploy_path}"
+                  sh "scp  -P  3906   Jenkins/deploy_dev.sh root@221.226.116.222:${k8s_yaml_deploy_path}/deploy.${rev}.${tag}.sh"
+
+                  sh "bash -x Jenkins/deploy_dev.sh  ${k8s_yaml_deploy_path} ${k8s_yaml_name} ${BRANCH_NAME}.${rev}.${tag}  ${helm_values_name} "
+                  
+                }
+            }
+        }
+		 stage('部署应用') {
+            when {
+                expression { BRANCH_NAME ==~ /(sit|prd)/ }
+                
+            }
+
+            steps {
+                script {
+                    //修改values文件的image值
+                    sh "sed -i 's/{{imageversion}}/${rev}.${tag}/g' install/helm/app/${helm_values_name}.yaml"                
+                    archiveArtifacts artifacts: "install/helm/app/${helm_values_name}.yaml", fingerprint: true
+                    withCredentials([sshUserPrivateKey(credentialsId: "${deploy_host_crdid}", keyFileVariable: 'identityFile', usernameVariable: 'user')]) {
+                        def remote = ['name':'${deploy_host_crdid}', 'host':deploy_host, 'identityFile':identityFile, 'user':user, 'allowAnyHosts':true]
+                        // 传输原料文件
+                         sshPut remote: remote, from: "install", into: k8s_yaml_deploy_path
+                         sshPut remote: remote, from: "Jenkins/deploy.sh", into: k8s_yaml_deploy_path + 
+					   "/deploy.${rev}.${tag}.sh" 
+                        // 链接生成的文件、 删除原来的服务 、 启动新的服务
+                        sshCommand remote: remote, command: ("cd ${k8s_yaml_deploy_path}"
+                                       + " && chmod +x deploy.${rev}.${tag}.sh" 
+                                       + " &&  ./deploy.${rev}.${tag}.sh  ${k8s_yaml_deploy_path} ${k8s_yaml_name} ${BRANCH_NAME}.${rev}.${tag}  ${helm_values_name}  "
+                        )
+                        
+                    }
+                }
+            }
+        }
+    }
+     post {
+        always {
+            emailext (
+                attachLog: true,
+                subject: "Status: ${currentBuild.result?:'SUCCESS'}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                    <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>""",
+                compressLog: true,
+                to: "gemingming-js@sino-carbon.cn",
+                from: "chenfei-js@sino-carbon.cn"
+            )
+        }
+       
+    }
+}

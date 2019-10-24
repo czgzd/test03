@@ -1,0 +1,53 @@
+server:
+  port: 8080
+  connectionTimeout: 5000
+  tomcat:
+    max-http-post-size: 0
+    uri-encoding: UTF-8
+    
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://mysql.basic-sit.svc.cluster.local:3306/horus_sit?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&&serverTimezone=GMT%2B8
+    username: root
+    password: SCIIscii123
+    driver-class-name: com.mysql.jdbc.Driver
+#    initialization-mode: always
+#    schema: classpath:db/schema.sql
+#    data: classpath:db/data.sql
+#    continue-on-error: true
+    hikari:
+      connection-timeout: 3000
+      minimum-idle: 2
+      maximum-pool-size: 5
+      auto-commit: true
+      pool-name: DatebookHikariCP
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  redis:
+    database: 0
+    cache-database: 15  #配置自己的redis库，database不要使用0
+    port: 6379
+    host: redis.basic-sit.svc.cluster.local
+    timeout: 30000
+    jedis:
+      pool:
+        max-active: 20  # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 16    # 连接池中的最大空闲连接
+        max-wait: 3000  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        min-idle: 8   # 连接池中的最小空闲连接
+          
+mybatis-plus:
+  mapper-locations: classpath:/com/sinocarbon/integral/mapper/*Mapper.xml
+  type-aliases-package: com.sinocarbon.integral.pojo
+  global-config.logic-delete-value: 0
+  global-config.logic-not-delete-value: 1
+  global-config.sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+  
+logging:
+  config: classpath:logback-boot.xml
+configService:
+  uri: http://config-service.infinity-sit.svc.cluster.local:8080
+ 

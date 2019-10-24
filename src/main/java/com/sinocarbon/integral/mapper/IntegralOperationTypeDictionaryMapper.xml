@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sinocarbon.integral.dao.IntegralOperationTypeDictionaryDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.sinocarbon.integral.pojo.IntegralOperationTypeDictionary">
+        <id column="id" property="id" />
+        <result column="operation_name" property="operationName" />
+        <result column="operation_picture_url" property="operationPictureUrl" />
+        <result column="operation_color" property="operationColor" />
+        <result column="gmt_create" property="gmtCreate" />
+		<result column="registration_code" property="registrationCode" />
+    </resultMap>
+	
+	
+	<select id="getOperationTypeDictionary" resultMap="BaseResultMap">
+		SELECT
+			d.operation_picture_url,
+			i.operation_name
+		FROM
+			integral_operation_type d 
+		LEFT JOIN 
+		integral_operation_type_dictionary i ON d.operation_id = i.id
+		WHERE
+		 <if test="operationTypeId != null">d.operation_id = #{operationTypeId}</if>   
+		<if test="registrationCode != null">AND d.registration_code = #{registrationCode}</if>
+	</select>
+</mapper>
