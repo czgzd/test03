@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -45,14 +44,14 @@ public class ExceptionHandlerAdvice {
 	 * @param exception
 	 * @return
 	 */
-	@ExceptionHandler({ AccessDeniedException.class })
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public ResponseEntity<BaseResponse> badMethodExpressException(HttpServletRequest request,AccessDeniedException exception) {
-		log.error("AccessDeniedException Handler---Host: {} invokes url: {} ERROR: {}", request.getRemoteHost(),
-				request.getRequestURL(), exception);
-		return new ResponseEntity<BaseResponse>(BaseResponse.failed(HttpServletResponse.SC_FORBIDDEN, exception.getMessage()),HttpStatus.FORBIDDEN);
-	
-	}
+//	@ExceptionHandler({ AccessDeniedException.class })
+//	@ResponseStatus(HttpStatus.FORBIDDEN)
+//	public ResponseEntity<BaseResponse> badMethodExpressException(HttpServletRequest request,AccessDeniedException exception) {
+//		log.error("AccessDeniedException Handler---Host: {} invokes url: {} ERROR: {}", request.getRemoteHost(),
+//				request.getRequestURL(), exception);
+//		return new ResponseEntity<BaseResponse>(BaseResponse.failed(HttpServletResponse.SC_FORBIDDEN, exception.getMessage()),HttpStatus.FORBIDDEN);
+//	
+//	}
 	
 	/**
 	 * 系统抛出的没有处理过的异常

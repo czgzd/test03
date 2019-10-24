@@ -23,18 +23,15 @@ import com.sinocarbon.integral.service.UserAccountInfoService;
 import com.sinocarbon.integral.utils.DateUtils;
 import com.sinocarbon.integral.utils.HeaderUtil;
 import com.sinocarbon.integral.utils.IsNotEmptyUtil;
-import com.sinocarbon.integral.utils.RedisUtil;
 import com.sinocarbon.integral.utils.TransformationBeansUtil;
-import com.sinocarbon.polaris.commons.pojo.LoginAppUser;
 import com.sinocarbon.polaris.commons.utils.BaseResponse;
-import com.sinocarbon.polaris.commons.utils.PublicCommonsUtils;
 
 @Service
 public class UserAccountInfoServiceImpl extends ServiceImpl<UserAccountInfoDao, UserAccountInfo>
 		implements UserAccountInfoService {
 
-	@Autowired
-	RedisUtil redisUtil;
+//	@Autowired
+//	RedisUtil redisUtil;
 	@Autowired
 	UserAccountInfoDao integralEmissionUserDao;
 	
@@ -83,9 +80,9 @@ public class UserAccountInfoServiceImpl extends ServiceImpl<UserAccountInfoDao, 
 		if (pageSize == null || pageSize == 0) {
 			pageSize = IntegralConstant.DEFAULT_PAGE_SIZE;
 		}
-		LoginAppUser loginAppUser=PublicCommonsUtils.getLoginAppUser();
+		//LoginAppUser loginAppUser=PublicCommonsUtils.getLoginAppUser();
 		AppUserInfo appUserInfo=new AppUserInfo();
-		appUserInfo.setRegistrationCode(loginAppUser.getTenantId());
+		appUserInfo.setRegistrationCode("scii");
 		Pagination page = new Pagination(pageNum, pageSize);
 		List<UserAccountPOJO> totalList = baseMapper.listUserAccountPOJO(appUserInfo, page);
 		return BaseResponse.successed(totalList);
