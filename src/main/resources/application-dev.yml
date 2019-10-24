@@ -26,18 +26,6 @@ spring:
     throw-exception-if-no-handler-found: true
   resources:
     add-mappings: false
-  redis:
-    database: 0
-    cache-database: 15  #配置自己的redis库，database不要使用0
-    port: 30862
-    host: 192.168.0.109
-    timeout: 30000
-    jedis:
-      pool:
-        max-active: 20  # 连接池最大连接数（使用负值表示没有限制）
-        max-idle: 16    # 连接池中的最大空闲连接
-        max-wait: 3000  # 连接池最大阻塞等待时间（使用负值表示没有限制）
-        min-idle: 8   # 连接池中的最小空闲连接
           
 mybatis-plus:
   mapper-locations: classpath:/com/sinocarbon/integral/mapper/*Mapper.xml
