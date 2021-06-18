@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 public class UserAccountInfoController {
 	public static void main(String[] args) {
 		System.out.println("Tesing  Git");
+		System.out.println("Tesing  Git02");
 	}
 }
 	
