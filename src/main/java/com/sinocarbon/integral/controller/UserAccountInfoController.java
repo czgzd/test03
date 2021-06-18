@@ -21,8 +21,11 @@ public class UserAccountInfoController {
 	public static void main(String[] args) {
 		System.out.println("Tesing  Git");
 		System.out.println("Tesing  Git02");
+
+
+		System.out.println("czg_test02分支");
 	}
-}
+} 
 	
 	
 	
